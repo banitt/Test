@@ -46,9 +46,14 @@ jobs:
           tags: edamianfijolek/testapi:latest
           labels: ${{ steps.meta.outputs.labels }}
           
-      - name: check if failed
+      - name: notify success
+        if: success()
+        run: |
+          curl -i -X POST -H 'Content-Type: application/json' -d '{"username": "Github BOT", "text": "Build finished ✔️"}' https://chat.dfijolek.pl/hooks/q9dbfeo9dt8axx7ah3z7er371h    
+      
+      - name: notify failure
         if: failure()
         run: |
-          curl -i -X POST -H 'Content-Type: application/json' -d '{"username": "Github BOT", "text": "Build failed"}' https://chat.dfijolek.pl/hooks/q9dbfeo9dt8axx7ah3z7er371h
+          curl -i -X POST -H 'Content-Type: application/json' -d '{"username": "Github BOT", "text": "Build failed ❌"}' https://chat.dfijolek.pl/hooks/q9dbfeo9dt8axx7ah3z7er371h
       
 
