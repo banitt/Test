@@ -31,7 +31,7 @@ namespace TestApi.Controllers
         }
 
         [HttpGet(Name = "Test")]
-        public string Get()
+        public string GetB()
         {
             return "OK";
         }
