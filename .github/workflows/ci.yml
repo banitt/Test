@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Send info about new change
         run: |
-          curl -i -X POST -H 'Content-Type: application/json' -d '{"username": "Github BOT", "text": "New change: ${{ github.event.head_commit.message }} by: ${{ github.event.head_commit.author.name }}"}' https://chat.dfijolek.pl/hooks/q9dbfeo9dt8axx7ah3z7er371h
+          curl -i -X POST -H 'Content-Type: application/json' -d '{"username": "Github BOT", "text": "**New change:** ${{ github.event.head_commit.message }} **by:** ${{ github.event.head_commit.author.name }}"}' https://chat.dfijolek.pl/hooks/q9dbfeo9dt8axx7ah3z7er371h
         
       - name: Check out the repo
         uses: actions/checkout@v3
