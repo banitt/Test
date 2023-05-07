@@ -29,7 +29,7 @@ namespace TestApi.Controllers
             })
             .ToArray();
         }
-
+FAIL
         [HttpGet(Name = "Test")]
         public string GetB()
         {
