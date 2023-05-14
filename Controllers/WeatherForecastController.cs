@@ -1,57 +1,72 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace TestApi.Controllers
 {
     [ApiController]
-    [Route("[controller]/[action]")]
+    [Route("account")]
     public class WeatherForecastController : ControllerBase
     {
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly BloggingContext _context;
+        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, BloggingContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
             _logger = logger;
+            _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        [HttpGet(Name = "Test")]
-        public IActionResult Test()
+        [HttpPost("register")]
+        public async Task<IActionResult> Test(RegisterRequest registerRequest)
         {
-            var context = new BloggingContext();
+            var user = new IdentityUser { UserName = registerRequest.Login, Email = registerRequest.Email };
+            var result = await _userManager.CreateAsync(user, registerRequest.Password);
 
-            context.Blogs.Add(new Blog() { Url = Random.Shared.Next(0,100).ToString() });
-            context.SaveChanges();
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
 
-            var blogs = context.Blogs.ToList();
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(RegisterRequest registerRequest)
+        {
+            var user = await _userManager.Users
+                .SingleOrDefaultAsync(x => x.UserName == registerRequest.Login && x.Email == registerRequest.Email);
 
-            return Ok(blogs);
+            if (user == null) 
+                return Unauthorized("Invalid username");
+
+            var identity = new IdentityUser();
+            identity.UserName = registerRequest.Login;
+            identity.Email = registerRequest.Email;
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, registerRequest.Password, false);
+
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
     }
 
-    public class BloggingContext : DbContext
+    public class RegisterRequest
     {
-        public DbSet<Blog> Blogs { get; set; }
-        public DbSet<Post> Posts { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql("Host=3.76.240.32;Database=test;Username=mmuser;Password=mmuser_password");
-    }
-
-    public class Blog
-    {
-        public int BlogId { get; set; }
-        public string Url { get; set; }
-
-        public List<Post> Posts { get; set; }
-    }
-
-    public class Post
-    {
-        public int PostId { get; set; }
-        public string Title { get; set; }
-        public string Content { get; set; }
-
-        public int BlogId { get; set; }
-        public Blog Blog { get; set; }
+        public string Login { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }
