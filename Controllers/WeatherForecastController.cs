@@ -33,7 +33,8 @@ namespace TestApi.Controllers
             }
             else
             {
-                return BadRequest();
+                var errorMsg = result.Errors.Select(x => x.Description);
+                return StatusCode(500, errorMsg);
             }
         }
 
@@ -58,7 +59,7 @@ namespace TestApi.Controllers
             }
             else
             {
-                return BadRequest();
+                return StatusCode(500, "fail");
             }
         }
     }
